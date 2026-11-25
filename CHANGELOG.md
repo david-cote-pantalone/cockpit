@@ -5,6 +5,10 @@ Each version is tagged `v<version>` and has a GitHub release with these notes, b
 plugin, share the version with the apps (`herdr/tui/Cargo.toml`), whose binaries the release builds; the section for it
 must be here first.
 
+## 1.5.3-linux.2 (2026-11-25)
+
+- Fix: letters typed in a show view's text boxes (a question's "Something else…", a blueprint step's change, a diff comment) are typed, no longer taken as the view's keys: j and k no longer move between the answers, o no longer opens the page, a digit or ⏎ no longer picks an answer
+
 ## 1.5.3-linux.1 (2026-11-25)
 
 A fork of 1.5.3 with two Linux fixes, built and installed from github.com/david-cote-pantalone/cockpit.
