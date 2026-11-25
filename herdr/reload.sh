@@ -9,6 +9,8 @@ set -eu
 
 root=$(cd "$(dirname "$0")" && pwd)
 H="${HERDR_BIN_PATH:-herdr}"
+# A Herdr app terminal names the app's socket here, which the herdr CLI cannot read: without it the CLI finds its own.
+case "${HERDR_SOCKET_PATH:-}" in */herdr-app.sock) unset HERDR_SOCKET_PATH ;; esac
 HC="${HC_BIN_PATH:-$HOME/.local/bin/hc}"
 app_home=${HERDR_APP_HOME:-$HOME/.config/herdr-app}
 idle_only=${1:-}

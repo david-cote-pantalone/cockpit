@@ -234,6 +234,23 @@ fn pin_spaces_moves_the_pinned_ones_on_top_in_order() {
     assert_eq!(sandbox.calls(), ["herdr workspace list"]);
 }
 
+/// A Herdr app terminal names the app's socket, which the herdr CLI cannot read: the scripts drop it, and keep herdr's own.
+#[test]
+fn the_herdr_app_s_socket_never_reaches_the_herdr_cli() {
+    let sandbox = Sandbox::new();
+    sandbox.copy_script("pin-spaces.sh");
+    sandbox.copy_script("lib.sh");
+    let herdr = common::fake("herdr", &sandbox.log(), &[("*", r#"    printf '%s\n' '{"result": {"workspaces": []}}'"#)]).replacen(
+        "\"herdr $*\"",
+        "\"herdr [${HERDR_SOCKET_PATH:-}] $*\"",
+        1,
+    );
+    executable(&sandbox.root.join("bin/herdr"), &herdr);
+    sandbox.sh("pin-spaces.sh", &[], &[("HERDR_SOCKET_PATH", "/s/herdr-app/herdr-app.sock")]);
+    sandbox.sh("pin-spaces.sh", &[], &[("HERDR_SOCKET_PATH", "/s/herdr.sock")]);
+    assert_eq!(sandbox.calls(), ["herdr [] workspace list", "herdr [/s/herdr.sock] workspace list"]);
+}
+
 // ---------------------------------------------------------------------------
 // ensure-spaces.sh
 

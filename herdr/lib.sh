@@ -2,6 +2,8 @@
 # shellcheck disable=SC2034  # the scripts sourcing this file use its settings
 # Settings shared by the scripts, from the cockpit config that /cockpit:setup writes.
 H="${HERDR_BIN_PATH:-herdr}"
+# A Herdr app terminal names the app's socket here, which the herdr CLI cannot read: without it the CLI finds its own.
+case "${HERDR_SOCKET_PATH:-}" in */herdr-app.sock) unset HERDR_SOCKET_PATH ;; esac
 ROOT=$(cd "$(dirname "$0")" && pwd -P)
 OS=$(uname)
 # herdr installs each update in a new folder: keys and space apps go through this link, kept on the current one.
