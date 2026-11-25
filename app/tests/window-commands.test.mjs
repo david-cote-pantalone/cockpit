@@ -365,6 +365,19 @@ test("monitor, routines, inbox, mail, meetings and to-do do nothing on a bare wi
   assert.deepEqual(plain(requests.map((r) => [r.app, r.action])), [["monitor", "fix"], ["mail", "mail_reply"], ["meetings", "prepare"]]);
 });
 
+test("a key typed into a show view's text box is typed, never taken as a shortcut", async () => {
+  const { mod, acts } = await fixture();
+  const s = Object.create(mod.Show.prototype);
+  const view = { name: "ask", url: "https://example.com/view", blocks: [{ n: 0, type: "choice", prompt: "Which one?", options: [{ label: "Maya" }, { label: "Sam" }] }] };
+  Object.assign(s, { name: null, panel: false, handle: focus(), ui: new Map(), toasts: toasts(), view: () => view, first: 0, focus: 0, pointed: false, typing: new Set(["other"]) });
+  const { cx, settled } = context();
+  for (const keystroke of ["j", "k", "o", "r", "n", "space", "1", "enter", "a", "e"]) assert.equal(s.key({ keystroke }, cx), false, keystroke);
+  await settled();
+  assert.equal(acts.length, 0, "no answer from a digit or ⏎ typed in the box");
+  s.typing.clear();
+  assert.equal(s.key({ keystroke: "j" }, cx), true, "with no box in focus, j moves through the options");
+});
+
 test("show:go puts a confirm block in view, but only a click or a move to it answers it", async () => {
   const { mod, acts } = await fixture();
   const s = Object.create(mod.Show.prototype);

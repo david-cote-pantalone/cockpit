@@ -114,10 +114,19 @@ export default class Show {
     this.ask = InputState.new({ placeholder: "What should change in this step?" });
     this.ask.on("submit", (_e, cx) => this.sendAsk(cx));
     this.other = InputState.new({ placeholder: "Something else…" });
+    // The text boxes in focus: while one is, its keys are typed, never taken as the view's shortcuts.
+    this.typing = new Set();
+    for (const box of [this.input, this.ask, this.other]) {
+      box.on("focus", () => this.typing.add(box));
+      box.on("blur", () => this.typing.delete(box));
+    }
     this.other.on("submit", (_e, cx) => {
       const n = this.focus;
       const text = this.other.value().trim();
-      if (n !== null && text) this.answer(cx, n, "choice", text, text);
+      if (n !== null && text) {
+        this.answer(cx, n, "choice", text, text);
+        this.handle.focus();
+      }
     });
     this.subscribe(cx);
     if (this.name) {
@@ -423,6 +432,7 @@ export default class Show {
     const view = this.view();
     const key = e.keystroke;
     if (this.palette) return this.paletteKey(e, cx);
+    if (this.typing?.size && key !== "escape") return false;
     const b = this.focus !== null ? view?.blocks?.[this.focus] : null;
     if (b && this.blockKey(b, e, cx)) return true;
     const n = view?.blocks?.length ?? 0;
