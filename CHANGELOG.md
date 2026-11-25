@@ -5,6 +5,15 @@ Each version is tagged `v<version>` and has a GitHub release with these notes, b
 plugin, share the version with the apps (`herdr/tui/Cargo.toml`), whose binaries the release builds; the section for it
 must be here first.
 
+## 1.5.3-linux.1 (2026-11-25)
+
+A fork of 1.5.3 with two Linux fixes, built and installed from github.com/david-cote-pantalone/cockpit.
+
+- Fix: the Herdr app on Linux, installed in `~/.local/share/herdr-app`, counts as a person, so merge, answering asks and Start work run from it
+- Fix: update.sh, reload.sh and the scripts on lib.sh drop a `HERDR_SOCKET_PATH` that names the Herdr app's socket, so their herdr calls work from a Herdr app terminal
+- Note: update checks, release notes and release binaries come from the fork's `linux-fixes` branch and releases instead of quaresc/cockpit
+- Note: a version's numbers compare by their leading digits, so `1.5.3-linux.1` sorts after `1.5.3`
+
 ## 1.5.3 (2026-11-25)
 
 - New: code in Cockpit Chat answers and in show notes is coloured by its language and can be selected and copied (#103)
