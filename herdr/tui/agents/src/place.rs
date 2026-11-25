@@ -176,9 +176,10 @@ const APPS: [(&str, &str); 11] = [
 
 /// Terminals and multiplexers outside a bundle: one counts where it is installed (`installed`), so a copy under that
 /// name elsewhere does not, whatever PATH the hub runs on.
-const PROGRAMS: [&str; 16] = [
+const PROGRAMS: [&str; 17] = [
     "herdr",
     "herdr-core",
+    "herdr-app",
     "tmux",
     "mosh-server",
     "sshd",
@@ -195,6 +196,10 @@ const PROGRAMS: [&str; 16] = [
     "tilix",
 ];
 
+/// Apps installed for the account alone, outside a bundle: the folder under the home their installer puts them in, and
+/// their executable. The Herdr app's Linux installer puts it in `~/.local/share/herdr-app`.
+const HOME_APPS: [(&str, &str); 1] = [(".local/share/herdr-app", "herdr-app")];
+
 /// Whether `exe`, a process's real executable path, is a window or terminal the person uses.
 fn front(exe: &Path, look: &dyn Look) -> bool {
     let parts: Vec<&str> = exe.iter().filter_map(|p| p.to_str()).collect();
@@ -206,8 +211,10 @@ fn front(exe: &Path, look: &dyn Look) -> bool {
     let iterm =
         parts.len() >= 3 && parts[parts.len() - 3..parts.len() - 1] == ["Application Support", "iTerm2"] && parts[parts.len() - 1].starts_with("iTermServer-");
     let name = exe.file_name().and_then(|n| n.to_str()).unwrap_or_default();
-    let program = PROGRAMS.contains(&name) && installed(exe, look.home().as_deref());
-    bundled || iterm || program
+    let home = look.home();
+    let program = PROGRAMS.contains(&name) && installed(exe, home.as_deref());
+    let home_app = home.is_some_and(|h| HOME_APPS.iter().any(|(dir, app)| name == *app && exe.parent() == Some(h.join(dir).as_path())));
+    bundled || iterm || program || home_app
 }
 
 /// Package managers' folders, each executable at `<folder>/<package>/<version>/bin/<name>`: Homebrew's Cellars.
@@ -372,6 +379,9 @@ mod tests {
         let updated = Fake { gone: vec![945], ..Fake::default() };
         assert_eq!(walk(946, &t, &[], &programs(), 999, &updated), Walk::Replaced("Herdr".into()));
         assert_eq!(walk(946, &t, &[], &programs(), 999, &Fake::default()), Walk::Detached, "an executable merely unreadable is no update");
+        let linux = table(&[(950, 1, "herdr-app"), (951, 950, "cockpit")]);
+        let updated = Fake { gone: vec![950], ..Fake::default() };
+        assert_eq!(walk(951, &linux, &[], &programs(), 999, &updated), Walk::Replaced("herdr-app".into()), "the Herdr app updated on Linux");
         let root_sshd = table(&[(70, 1, "/usr/sbin/sshd"), (71, 70, "sshd-session"), (72, 71, "cockpit")]);
         assert_eq!(walk(72, &root_sshd, &[], &programs(), 999, &Fake::default()), Walk::Detached, "a root sshd cockpit cannot read");
         let t = table(&[(20, 1, "launchd-helper"), (21, 20, "cockpit")]);
@@ -407,6 +417,15 @@ mod tests {
             ("/nix/store/abc-tmux-3.5/bin/tmux", Walk::Front),
             ("/Users/me/.local/bin/herdr", Walk::Front),
             ("/Users/me/.cargo/bin/herdr", Walk::Front),
+            // The Herdr app on Linux, where its installer puts it for the account, and nowhere else under that name.
+            ("/Users/me/.local/share/herdr-app/herdr-app", Walk::Front),
+            ("/Users/me/.local/bin/herdr-app", Walk::Front),
+            ("/usr/bin/herdr-app", Walk::Front),
+            ("/Users/other/.local/share/herdr-app/herdr-app", Walk::Detached),
+            ("/Users/me/.local/share/herdr-app/sub/herdr-app", Walk::Detached),
+            ("/Users/me/.local/share/other/herdr-app", Walk::Detached),
+            ("/Users/me/.local/share/herdr-app/tmux", Walk::Detached),
+            ("/tmp/x/herdr-app", Walk::Detached),
         ] {
             look.exes.insert(10, exe);
             assert_eq!(walk(13, &t, &[], &programs(), 999, &look), placed, "{exe}");
