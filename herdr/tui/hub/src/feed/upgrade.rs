@@ -8,12 +8,17 @@ use super::{http, news};
 use crate::config::Config;
 
 const EVERY_MS: u64 = 6 * 3600 * 1000;
-const PUBLISHED: &str = "https://raw.githubusercontent.com/quaresc/cockpit/main/plugin/.claude-plugin/plugin.json";
-const CHANGELOG: &str = "https://raw.githubusercontent.com/quaresc/cockpit/main/CHANGELOG.md";
+const PUBLISHED: &str = "https://raw.githubusercontent.com/david-cote-pantalone/cockpit/linux-fixes/plugin/.claude-plugin/plugin.json";
+const CHANGELOG: &str = "https://raw.githubusercontent.com/david-cote-pantalone/cockpit/linux-fixes/CHANGELOG.md";
 
-/// Whether `a` is a later version than `b`, number by number.
+/// Whether `a` is a later version than `b`, number by number, each by its leading digits (`3-linux` is 3).
 pub fn is_newer(a: &str, b: &str) -> bool {
-    let parts = |v: &str| v.trim_start_matches('v').split('.').map(|p| p.parse::<u64>().unwrap_or(0)).collect::<Vec<_>>();
+    let parts = |v: &str| {
+        v.trim_start_matches('v')
+            .split('.')
+            .map(|p| p.chars().take_while(char::is_ascii_digit).collect::<String>().parse::<u64>().unwrap_or(0))
+            .collect::<Vec<_>>()
+    };
     parts(a) > parts(b)
 }
 
@@ -179,6 +184,7 @@ mod tests {
     #[test]
     fn a_newer_version_is_announced_once() {
         assert!(is_newer("0.37.0", "0.36.1") && !is_newer("0.36.1", "0.36.1") && is_newer("1.0.0", "0.99.9"));
+        assert!(is_newer("1.5.4-linux.1", "1.5.3-linux.1") && is_newer("1.5.3-linux.2", "1.5.3-linux.1") && !is_newer("1.5.3", "1.5.3-linux.1"));
         let (state, said) = next(&json!({"at": 0}), Some("0.37.0"), "0.36.1", 5);
         assert_eq!((said.as_deref(), &state["notified"]), (Some("0.37.0"), &json!("0.37.0")));
         let (_, again) = next(&state, Some("0.37.0"), "0.36.1", 9);

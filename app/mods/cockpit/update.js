@@ -12,7 +12,7 @@ import { layoutName } from "./screens.js";
 import { ago } from "./fresh.js";
 import { tokens, alpha, TEXT, RADIUS, Icon, Button, Spinner, Mono, Toggle, Badge } from "./ui.js";
 
-const RELEASES = "https://github.com/quaresc/cockpit/releases/tag/v";
+const RELEASES = "https://github.com/david-cote-pantalone/cockpit/releases/tag/v";
 
 /** An install this window started, followed again by the dialog the mod's reload in the middle of it makes anew. */
 const FLOW = "cockpit.update.flow";
@@ -28,7 +28,7 @@ const LAYOUT_TITLES = { "cockpit-chat": "Cockpit Chat" };
 
 /** Whether `a` is a later version than `b`, number by number, as the hub compares them. */
 export function isNewer(a, b) {
-  const parts = (v) => String(v ?? "").replace(/^v/, "").split(".").map((p) => Number(p) || 0);
+  const parts = (v) => String(v ?? "").replace(/^v/, "").split(".").map((p) => parseInt(p, 10) || 0);
   const [x, y] = [parts(a), parts(b)];
   for (let i = 0; i < Math.max(x.length, y.length); i++) if ((x[i] ?? 0) !== (y[i] ?? 0)) return (x[i] ?? 0) > (y[i] ?? 0);
   return false;

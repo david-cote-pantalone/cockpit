@@ -36,8 +36,8 @@ export function ticketsIn(text: string, inbox: Inbox | null, known: string[]) {
 export const ticketKey = (branch: string, inbox: Inbox | null, known: string[]) => ticketsIn(branch.replace(/[/_]/g, ' '), inbox, known)[0]
 
 export function isNewer(latest: string, current: string) {
-  const a = latest.split('.').map(Number)
-  const b = current.split('.').map(Number)
+  const a = latest.split('.').map((p) => parseInt(p, 10) || 0)
+  const b = current.split('.').map((p) => parseInt(p, 10) || 0)
   for (let i = 0; i < Math.max(a.length, b.length); i++) {
     if ((a[i] ?? 0) !== (b[i] ?? 0)) return (a[i] ?? 0) > (b[i] ?? 0)
   }

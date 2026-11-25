@@ -7,7 +7,9 @@ import { withLease } from './store'
 
 type $ = EngineInterface
 
-const REPO = 'quaresc/cockpit'
+const REPO = 'david-cote-pantalone/cockpit'
+// The fork's release line, which the published version is read from.
+const BRANCH = 'linux-fixes'
 const UPDATE_EVERY_MS = 6 * 3600_000
 
 // Read once and kept: after an update the manifest on disk is the new version, while this session still runs the
@@ -58,7 +60,7 @@ export async function checkUpdate($: $) {
   if (Date.now() - state.at < UPDATE_EVERY_MS) return
   await withLease($, 'update', async () => {
     const { exitCode, stdout } = await $.process.run(
-      ['gh', 'api', `repos/${REPO}/contents/plugin/.claude-plugin/plugin.json`, '-H', 'Accept: application/vnd.github.raw'],
+      ['gh', 'api', `repos/${REPO}/contents/plugin/.claude-plugin/plugin.json?ref=${BRANCH}`, '-H', 'Accept: application/vnd.github.raw'],
       { timeoutMs: 20_000 },
     )
     const latest = exitCode === 0 ? (JSON.parse(stdout) as { version?: string }).version : undefined
