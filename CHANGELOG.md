@@ -5,6 +5,10 @@ Each version is tagged `v<version>` and has a GitHub release with these notes, b
 plugin, share the version with the apps (`herdr/tui/Cargo.toml`), whose binaries the release builds; the section for it
 must be here first.
 
+## 1.6.1-linux.3 (2026-11-26)
+
+- Fix: Focus on Home in Cockpit Chat opens the agent's chat; it failed with "layout.show failed: no node home-agent", a column only the Cockpit layout has
+
 ## 1.6.1-linux.2 (2026-11-26)
 
 - Fix: Cockpit Chat draws the window's minimize, maximize and close buttons where the system has no title bar for it (Linux, Windows)
