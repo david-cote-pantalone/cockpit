@@ -5,6 +5,10 @@ Each version is tagged `v<version>` and has a GitHub release with these notes, b
 plugin, share the version with the apps (`herdr/tui/Cargo.toml`), whose binaries the release builds; the section for it
 must be here first.
 
+## 1.5.3-linux.4 (2026-11-26)
+
+- Fix: a show view's questions draw again: their "Something else…" boxes are made when the view arrives, since Herdr refuses state made while a block is drawn
+
 ## 1.5.3-linux.3 (2026-11-26)
 
 - Fix: each question in a show view has its own "Something else…" box: words typed in one no longer show in every other, and ⏎ answers the question whose box it is
