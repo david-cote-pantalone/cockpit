@@ -113,21 +113,11 @@ export default class Show {
     this.asking = null;
     this.ask = InputState.new({ placeholder: "What should change in this step?" });
     this.ask.on("submit", (_e, cx) => this.sendAsk(cx));
-    this.other = InputState.new({ placeholder: "Something else…" });
+    // Each question's "Something else…" box, by its block: each keeps its own words and answers its own question.
+    this.others = new Map();
     // The text boxes in focus: while one is, its keys are typed, never taken as the view's shortcuts.
     this.typing = new Set();
-    for (const box of [this.input, this.ask, this.other]) {
-      box.on("focus", () => this.typing.add(box));
-      box.on("blur", () => this.typing.delete(box));
-    }
-    this.other.on("submit", (_e, cx) => {
-      const n = this.focus;
-      const text = this.other.value().trim();
-      if (n !== null && text) {
-        this.answer(cx, n, "choice", text, text);
-        this.handle.focus();
-      }
-    });
+    for (const box of [this.input, this.ask]) this.watchTyping(box);
     this.subscribe(cx);
     if (this.name) {
       // A pane split from the agent's is focused for a moment: that is how this copy learns which pane it is.
@@ -139,6 +129,28 @@ export default class Show {
       learn();
       cx.timer.after(150, () => learn());
     }
+  }
+
+  watchTyping(box) {
+    box.on("focus", () => this.typing.add(box));
+    box.on("blur", () => this.typing.delete(box));
+  }
+
+  /** The "Something else…" box of question block `n`, made the first time it is drawn. */
+  otherBox(n) {
+    this.others ??= new Map();
+    let box = this.others.get(n);
+    if (box) return box;
+    box = InputState.new({ placeholder: "Something else…" });
+    this.watchTyping(box);
+    box.on("submit", (_e, cx) => {
+      const text = box.value().trim();
+      if (!text) return;
+      this.answer(cx, n, "choice", text, text);
+      this.handle.focus();
+    });
+    this.others.set(n, box);
+    return box;
   }
 
   close() {
@@ -187,7 +199,11 @@ export default class Show {
     if (!view) return;
     if (!before || before.name !== view.name || before.at !== view.at) {
       this.first = 0;
-      if (before?.name !== view.name) [this.focus, this.asking] = [null, null];
+      if (before?.name !== view.name) {
+        [this.focus, this.asking] = [null, null];
+        for (const box of this.others?.values() ?? []) this.typing?.delete(box);
+        this.others?.clear();
+      }
       if (this.pendingGo?.startsWith(`${view.name}#`)) {
         const go = this.pendingGo;
         this.pendingGo = null;
@@ -1200,9 +1216,9 @@ export default class Show {
         }))
         .when(Boolean(preview), (e) => e.child(div().p(10).rounded(RADIUS.md).bg(k.muted).child(TextView.markdown(`show-pv-${b.n}-${st.at}`, String(preview ?? "")).text_size(TEXT.sm))))
         .child(h_flex().gap(8).items_center()
-          .child(Input.new(this.other).flex_1().h(32).px(8).rounded(RADIUS.md).border_1().border_color(k.input).bg(k.background).text_size(TEXT.sm))
+          .child(Input.new(this.otherBox(b.n)).flex_1().h(32).px(8).rounded(RADIUS.md).border_1().border_color(k.input).bg(k.background).text_size(TEXT.sm))
           .child(Button(`show-other-${b.n}`, { label: "Send", size: "sm", variant: "outline", onClick: (_e, cx) => {
-            const text = this.other.value().trim();
+            const text = this.otherBox(b.n).value().trim();
             if (text) this.answer(cx, b.n, "choice", text, text);
           } }))));
   }

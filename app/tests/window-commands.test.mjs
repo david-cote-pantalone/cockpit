@@ -378,6 +378,17 @@ test("a key typed into a show view's text box is typed, never taken as a shortcu
   assert.equal(s.key({ keystroke: "j" }, cx), true, "with no box in focus, j moves through the options");
 });
 
+test("each question of a show view has its own Something else box", async () => {
+  const { mod } = await fixture();
+  const s = Object.create(mod.Show.prototype);
+  Object.assign(s, { typing: new Set() });
+  const [first, second] = [s.otherBox(1), s.otherBox(2)];
+  assert.notEqual(first, second);
+  assert.equal(s.otherBox(1), first, "a box is drawn again as the same one");
+  first.set_value("Maya first");
+  assert.equal(second.value(), "", "words typed in one question stay out of the others");
+});
+
 test("show:go puts a confirm block in view, but only a click or a move to it answers it", async () => {
   const { mod, acts } = await fixture();
   const s = Object.create(mod.Show.prototype);
