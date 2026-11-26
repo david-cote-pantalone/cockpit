@@ -461,16 +461,32 @@ export default class ChatTop {
           .flex_1()
           .justify_end()
           .child(
-            capsule("chat-actions", [
-              this.hubButton(k),
-              // Herdr's own new menu: a terminal, an agent, a space, a worktree.
-              button("chat-new-tab", "plus", hint("Start something new", "cockpit.new"), (_e, cx) => {
-                openNew();
-                cx.notify();
-              }),
-              // The agent's own terminal, shown by its provider's logo rather than a generic terminal glyph.
-              this.terminalButton(k),
-            ]).on_size_change((size, cx) => this.sized("right", size.width, cx)),
+            h_flex()
+              .gap(GAP)
+              .items_center()
+              .child(
+                capsule("chat-actions", [
+                  this.hubButton(k),
+                  // Herdr's own new menu: a terminal, an agent, a space, a worktree.
+                  button("chat-new-tab", "plus", hint("Start something new", "cockpit.new"), (_e, cx) => {
+                    openNew();
+                    cx.notify();
+                  }),
+                  // The agent's own terminal, shown by its provider's logo rather than a generic terminal glyph.
+                  this.terminalButton(k),
+                ]),
+              )
+              // Without a system title bar outside macOS, the layout draws the window's controls itself.
+              .when(Boolean(win()?.buttons), (e) =>
+                e.child(
+                  capsule("chat-window", [
+                    button("chat-window-min", "minus", "Minimize", () => run("window.minimize")),
+                    button("chat-window-max", win()?.maximized ? "copy" : "square", win()?.maximized ? "Restore" : "Maximize", () => run("window.maximize")),
+                    button("chat-window-close", "x", "Close the window", () => run("window.close")),
+                  ]),
+                ),
+              )
+              .on_size_change((size, cx) => this.sized("right", size.width, cx)),
           ),
       );
   }
