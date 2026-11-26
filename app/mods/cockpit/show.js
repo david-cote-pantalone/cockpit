@@ -136,7 +136,7 @@ export default class Show {
     box.on("blur", () => this.typing.delete(box));
   }
 
-  /** The "Something else…" box of question block `n`, made the first time it is drawn. */
+  /** The "Something else…" box of question block `n`, made when the view arrives: a draw only reads it. */
   otherBox(n) {
     this.others ??= new Map();
     let box = this.others.get(n);
@@ -213,6 +213,7 @@ export default class Show {
     }
     if (this.focus !== null && this.focus >= view.blocks.length) this.focus = null;
     for (const b of view.blocks) {
+      if (b.type === "choice") this.otherBox(b.n);
       if (b.type === "image" && b.src) this.ensure(b.src, cx);
       if (b.type === "compare") [b.before, b.after].forEach((s) => s && this.ensure(s, cx));
     }
@@ -1215,12 +1216,12 @@ export default class Show {
             .child(Icon("corner-down-left", { size: 14, color: on ? k.ring : k.dim }));
         }))
         .when(Boolean(preview), (e) => e.child(div().p(10).rounded(RADIUS.md).bg(k.muted).child(TextView.markdown(`show-pv-${b.n}-${st.at}`, String(preview ?? "")).text_size(TEXT.sm))))
-        .child(h_flex().gap(8).items_center()
-          .child(Input.new(this.otherBox(b.n)).flex_1().h(32).px(8).rounded(RADIUS.md).border_1().border_color(k.input).bg(k.background).text_size(TEXT.sm))
+        .when(Boolean(this.others?.get(b.n)), (e) => e.child(h_flex().gap(8).items_center()
+          .child(Input.new(this.others.get(b.n)).flex_1().h(32).px(8).rounded(RADIUS.md).border_1().border_color(k.input).bg(k.background).text_size(TEXT.sm))
           .child(Button(`show-other-${b.n}`, { label: "Send", size: "sm", variant: "outline", onClick: (_e, cx) => {
-            const text = this.otherBox(b.n).value().trim();
+            const text = this.others.get(b.n).value().trim();
             if (text) this.answer(cx, b.n, "choice", text, text);
-          } }))));
+          } })))));
   }
 
   confirm(k, b, cx) {

@@ -387,6 +387,12 @@ test("each question of a show view has its own Something else box", async () => 
   assert.equal(s.otherBox(1), first, "a box is drawn again as the same one");
   first.set_value("Maya first");
   assert.equal(second.value(), "", "words typed in one question stay out of the others");
+  // They are made when the hub's view arrives, never while a block is drawn (Herdr refuses state made in a render).
+  const t = Object.create(mod.Show.prototype);
+  Object.assign(t, { typing: new Set(), panel: false, focus: null, toasts: toasts(), ensure() {} });
+  const { cx } = context();
+  t.take({ view: { name: "ask", at: 1, blocks: [{ n: 0, type: "choice" }, { n: 1, type: "markdown" }, { n: 2, type: "choice" }] } }, cx);
+  assert.deepEqual([...t.others.keys()], [0, 2]);
 });
 
 test("show:go puts a confirm block in view, but only a click or a move to it answers it", async () => {
