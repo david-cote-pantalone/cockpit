@@ -39,7 +39,7 @@ itself and need no `tools`.
 | `tickets` | Your tickets: `name`, `server`, `keys` (prefixes such as `ENG`), `urlTemplate`, and `token` for refreshes with no agent session. Linear and GitHub Issues are mapped by cockpit; naming their server is enough. |
 | `ci` | CI runs: `name`, `server`, `imageJob` (the job that pushes a preview's image), `token`. Empty `server` reads GitHub checks through `gh`. |
 | `calendar` | Meetings: `server`, and `calendars` (ids such as `primary` or an address) to read more than its default calendar; or `ics` (the calendar's secret iCal address) and `email` so the hub fetches them itself. |
-| `mail` | Unread mail: `name`, `server`. A tool that sends mail is never mapped. |
+| `mail` | Unread mail: `name`, `server`. `mail.tools.listUnread` lists the unread threads when the listing carries no unread flag, `mail.tools.peek` reads one thread's metadata for its date when it carries none. A tool that sends mail is never mapped. |
 | `platform` | Deploys and preview environments: `previewPrefix`, `previewDashboardUrl`, `workflowUrl`, `previewDefaults`. |
 | `metabase`, `datadog` | `{server}` — the connectors `show` panes refresh from. |
 | `servers` | The MCP servers cockpit calls itself, with their URL or command. Written by setup for agents other than Claude Code. |
@@ -64,7 +64,7 @@ itself and need no `tools`.
 | `brief` | `{enabled, at: "08:30", weekends: false}` | The morning brief. |
 | `meetingBrief` | `{enabled, model, skip, tools}` | What to read before a meeting. `skip` drops events by name. |
 | `deployWatch` | `{enabled, afterMinutes, tools}` | Checks errors after a deploy, through an observability connector. |
-| `monitor` | Datadog APM queries, `env: production` | The release monitor: `queries` ({service}, {env}), `moved` thresholds, `notify` (`mine`/`all`/`none`), `serviceReplace` when Datadog names a service differently from the platform. |
+| `monitor` | Datadog APM queries, `env: production` | The release monitor: `releaseDays` (how many days back a release shows and an app is watched after its last deploy, `1` by default; the series and error windows stay at 24 hours), `queries` ({service}, {env}), `moved` thresholds, `notify` (`mine`/`all`/`none`), `serviceReplace` when Datadog names a service differently from the platform. |
 | `runbookTools` | `[]` | Extra tools a runbook's background refresh may use. |
 | `names` | `true` | Agents, tabs and spaces named after their work: the name you gave, else the agent's own title, else its first prompt in a few words, never over a tab name you or another tool typed; `false` turns it off. |
 | `fetcher` | `true` | The Claude session the hub keeps for sources it cannot reach itself; `false` turns it off. |
@@ -74,6 +74,7 @@ itself and need no `tools`.
 | `browserIdleMinutes` | `60` | A browser whose space stayed out of view this long closes, and a Chromium tab out of view this long sleeps; `0` keeps them. |
 | `sideBrowser` | `terminal-browser` | The browser beside an agent: terminal-browser in a pane, or `chromium`, cockpit's own window docked in the Herdr app on macOS (see [browser.md](browser.md)). |
 | `links.open` | `browser` | Where a Cmd-click (Ctrl-click) on a web link in a Herdr app terminal opens it: `browser`, your own, or `side`, the side browser beside that terminal. |
+| `links.fromBranch` | `false` | An agent's ticket, PR and CI also come from its branch name and the pull requests on it; off, only what its conversation cites or creates counts, everywhere cockpit shows them. |
 | `browser` | `{dock: true, profileScope: "shared", popups: "tab", downloads: ""}` | The Chromium side browser: docked or a window of its own, the profile a worktree starts with (`shared`, `repo`, `worktree`), pop-ups as tabs or blocked, and the downloads folder (yours when empty). |
 | `artifactGuard` | `true` | In Claude Code, a new claude.ai artifact waits until `show` was tried or you asked for an artifact or a link; `false` lets every publish through (see [show.md](show.md)). |
 | `footer.links` | on in Claude Code | The links under the prompt; off in the Herdr app, whose status bar shows them. |
@@ -84,4 +85,4 @@ switch, a choice or a short field, section by section, each with its default; un
 holds and opens it in your editor. `cockpit options` prints the same list in a terminal, and
 `cockpit options set <key> <value>` sets one there: `on` or `off`, one of a choice's values, a field's text or a
 number, checked before anything is written (a script or an agent's tools are told to ask you). The options an update
-brings (`queue.drain`, `ci.tellAgents`, `chat.nextSteps`) are asked about once after that update.
+brings (`links.fromBranch`, `queue.drain`, `ci.tellAgents`, `chat.nextSteps`) are asked about once after that update.

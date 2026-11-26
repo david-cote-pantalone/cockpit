@@ -5,26 +5,39 @@ Each version is tagged `v<version>` and has a GitHub release with these notes, b
 plugin, share the version with the apps (`herdr/tui/Cargo.toml`), whose binaries the release builds; the section for it
 must be here first.
 
-## 1.5.3-linux.4 (2026-11-26)
+## 1.6.1-linux.1 (2026-11-26)
 
-- Fix: a show view's questions draw again: their "Something else…" boxes are made when the view arrives, since Herdr refuses state made while a block is drawn
-
-## 1.5.3-linux.3 (2026-11-26)
-
-- Fix: each question in a show view has its own "Something else…" box: words typed in one no longer show in every other, and ⏎ answers the question whose box it is
-
-## 1.5.3-linux.2 (2026-11-25)
-
-- Fix: letters typed in a show view's text boxes (a question's "Something else…", a blueprint step's change, a diff comment) are typed, no longer taken as the view's keys: j and k no longer move between the answers, o no longer opens the page, a digit or ⏎ no longer picks an answer
-
-## 1.5.3-linux.1 (2026-11-25)
-
-A fork of 1.5.3 with two Linux fixes, built and installed from github.com/david-cote-pantalone/cockpit.
+1.6.1 with the fork's Linux fixes, built and installed from github.com/david-cote-pantalone/cockpit (versions 1.5.3-linux.1 to 1.5.3-linux.4 carried them on 1.5.3).
 
 - Fix: the Herdr app on Linux, installed in `~/.local/share/herdr-app`, counts as a person, so merge, answering asks and Start work run from it
 - Fix: update.sh, reload.sh and the scripts on lib.sh drop a `HERDR_SOCKET_PATH` that names the Herdr app's socket, so their herdr calls work from a Herdr app terminal
+- Fix: letters typed in a show view's text boxes are typed, no longer taken as the view's keys (j/k, o, digits, ⏎)
+- Fix: each question in a show view has its own "Something else…" box, made when the view arrives, and ⏎ answers that question
 - Note: update checks, release notes and release binaries come from the fork's `linux-fixes` branch and releases instead of quaresc/cockpit
-- Note: a version's numbers compare by their leading digits, so `1.5.3-linux.1` sorts after `1.5.3`
+- Note: a version's numbers compare by their leading digits, so `1.6.1-linux.1` sorts after `1.6.1`
+
+## 1.6.1 (2026-11-26)
+
+- New: pinned apps carry a pin in the monitor, and pinning or muting an app shows at once instead of after the next refresh (#107)
+- New: monitor.releaseDays sets how many days back releases show and an app stays watched after its last deploy, one by default (#106)
+- Fix: o on an inbox PR opens it in the browser on Linux again (#105)
+- Fix: with herdr alone and no Herdr app, the hub runs its fetcher session in a space of its own, so the monitor refreshes by itself (#108)
+- Fix: in Cockpit Chat, a background job or subagent that ends while the agent runs a tool leaves the strip instead of spinning on (#112)
+
+## 1.6.0 (2026-11-26)
+
+- New: switching agents in Cockpit Chat is fast: the chat builds its one row, reads terminal screens between builds, pages the conversation with a cursor and sends the messages apart from what moves while a turn runs; the last conversation shows at once while the hub answers (#109)
+- New: every page a conversation cites stays in the links row, grouped per service (GitHub · 2, Notion · 3), each group a menu; GitHub PRs cited are links too (#109)
+- New: the ticket, PR and CI of an agent come from its session alone (what it cites or creates); `links.fromBranch` brings back the ones read from its branch name (#109)
+- New: Review and Changes say which repo and branch they show; Review picks among the session's repos and branches, and reviews a branch not checked out from its commits (#109)
+- New: a `/` command typed for a terminal agent is mirrored into its own box: its completion menu is the hints, and what the command opens (`/model`, `/effort`, `/resume`, `/config`, a yes or no) comes back as a card with its keys; a driven session takes `/model`, `/effort` and `/fast` as settings and refuses what only a terminal shows (#109)
+- New: the models, modes and effort levels Cockpit Chat offers are read from each CLI (`list_models`, `--help`) and kept per version; a driven session's commands get their descriptions from the files its agent reads (#109)
+- New: subagents and background jobs show on the turn that started them and in a strip above the box; a subagent's conversation opens in the chat (#109)
+- New: ⏎ in the chat box sends, ⇧⏎ is a new line (#109)
+- New: `cockpit hub view <name>` prints a view with its time, and `COCKPIT_HUB_TIMING=1` logs every build's (#109)
+- Fix: Mail shows unread mail again: unread comes from an `is:unread` listing and dates from a metadata read, since the Gmail connector's listing carries neither; the first refresh announces the current unread mail once (#109)
+- Fix: the "file opened last" button is gone from the side panel's bar; the file still opens there on a click (#109)
+- Note: `links.fromBranch` is asked once after the update; the mail mapping gains `listUnread` and `peek` (#109)
 
 ## 1.5.3 (2026-11-25)
 
