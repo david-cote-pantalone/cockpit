@@ -15,6 +15,8 @@ async function fixture(layout = "cockpit", live = null) {
       run: (...args) => calls.push(args),
       setShared: (...args) => calls.push(["shared", ...args]),
       shared: key => (key === "layout" ? layout : null),
+      // The Cockpit layout's column beside Home's board; Cockpit Chat has none.
+      layout: () => ({ id: "root", children: layout === "cockpit-chat" ? [] : [{ id: "home-agent", hidden: true }] }),
       notify: notice => notices.push(notice),
     },
     "./hub.js": { act: () => { throw new Error("no hub action expected"); }, openUrl: () => {} },
@@ -152,6 +154,17 @@ test("local Go, Peek, Open beside and Archive handlers retain their commands", a
   assert.deepEqual(f.calls.map(c => c[0]), ["agent.focus", "layout.select", "shared", "terminal.peek", "agent.focus", "layout.show", "tab.settle", "tab.settle"]);
   assert.equal(f.calls.at(-1)[1].id, "tab7");
   assert.equal(f.notices.length, 0);
+});
+
+test("Home's Focus in Cockpit Chat, which has no column beside the board, opens the agent's chat", async () => {
+  const f = await fixture("cockpit-chat");
+  const home = new f.fleet.Home();
+  home.toasts = { push() {} };
+  const [agent] = f.fleet.fleet({ agents: [{ address: "t7", terminal: "app:t7", title: "Local task", herdr: true }] }, {});
+  home.openBeside({ notify() {} }, agent);
+  const names = f.calls.map((c) => c[0]);
+  assert.ok(names.includes("agent.focus"), names.join(" "));
+  assert.ok(!names.includes("layout.show"), "no layout.show of a node the layout lacks");
 });
 
 test("every view reads an agent's status through one helper: error is failed, an unknown word needs a look", async () => {

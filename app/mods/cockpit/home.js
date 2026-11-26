@@ -313,6 +313,8 @@ export default class Home {
   /** The agent beside the board; asked by a window command (`pick` false) it leaves the card picked as it was. */
   openBeside(cx, a, pick = true) {
     if (!a) return;
+    // A layout with no column beside the board (Cockpit Chat) opens the agent's own chat instead.
+    if (!findNode(layout(), "home-agent")) return goToAgent(a);
     run("agent.focus", { terminal: a.address });
     run("layout.show", { id: "home-agent" });
     this.focusMode = true;

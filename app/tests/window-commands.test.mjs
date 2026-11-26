@@ -21,7 +21,7 @@ async function fixture({ layout = "cockpit", shown = "home", sandbox = false, fo
       const inner = now === "chat" || now === "tab";
       return { id: "root", children: [{ id: "screen", type: "stack", active: inner ? "work" : now, children: [{ id: "work", children: [{ id: "view", type: "stack", active: inner ? now : "chat", children: [] }] }] }] };
     }
-    return { id: "root", children: [{ id: "center", type: "stack", active: now, children: [{ id: "home" }] }] };
+    return { id: "root", children: [{ id: "center", type: "stack", active: now, children: [{ id: "home" }] }, { id: "home-agent", hidden: true }] };
   };
   const context = createContext({ console, setTimeout });
   const env = sandbox ? "COCKPIT_SANDBOX=/tmp/cc-x\nCOCKPIT_TEST_KEYS=1\nHOME=/h\n" : "COCKPIT_TEST_KEYS=1\nHOME=/h\n";
