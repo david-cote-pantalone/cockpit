@@ -5,6 +5,10 @@ Each version is tagged `v<version>` and has a GitHub release with these notes, b
 plugin, share the version with the apps (`herdr/tui/Cargo.toml`), whose binaries the release builds; the section for it
 must be here first.
 
+## 1.6.1-linux.2 (2026-11-26)
+
+- Fix: Cockpit Chat draws the window's minimize, maximize and close buttons where the system has no title bar for it (Linux, Windows)
+
 ## 1.6.1-linux.1 (2026-11-26)
 
 1.6.1 with the fork's Linux fixes, built and installed from github.com/david-cote-pantalone/cockpit (versions 1.5.3-linux.1 to 1.5.3-linux.4 carried them on 1.5.3).
